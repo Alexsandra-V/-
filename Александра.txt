@@ -1,0 +1,58 @@
+
+CREATE TABLE studenti(
+    studenti_id SERIAL PRIMARY KEY,
+    imya VARCHAR(255) NOT NULl,
+    pochta VARCHAR(255) UNIQUE NOT NULL, 
+    god_postyplenia INT 
+);
+CREATE TABLE kyrsi (
+    kyrsi_id SERIAL PRIMARY KEY,
+    nazvanie_kyrsa VARCHAR(255) NOT NULL, 
+    zachoti INT CHECK (zachoti > 0) 
+);
+CREATE TABLE zachislenie (
+    studenti_id INT REFERENCES Studenti(studenti_id) ON DELETE CASCADE,
+    kyrsi_id INT REFERENCES kyrsi(kyrsi_id) ON DELETE CASCADE,
+    ochenka CHAR(1), 
+    PRIMARY KEY (studenti_id, kyrsi_id)
+);
+INSERT INTO studenti (imya,pochta,god_postyplenia) VALUES ('Алексей Смирнов','lexa@gmail.com',2021),
+('Елена Кузнецова','lenkaCOOL@yandex.ru',2022),
+('Дмитрий Новиков','Dimooon2005@yandex.ru',2021),
+('Ольга Морозова','ole4ka@mail.com',2023);
+INSERT INTO kyrsi (nazvanie_kyrsa,zachoti) VALUES('Введение в программирование',5),
+('Базы данных',4),
+('Веб-технологии',4);
+INSERT INTO zachislenie(studenti_id,kyrsi_id,ochenka) VALUES (1,2,'A');
+INSERT INTO zachislenie(studenti_id,kyrsi_id,ochenka) VALUES (2,2,'B'),
+ (2,3,'A'),
+ (3,1,NULL),
+ (3,2,NULL),
+ (3,3,NULL);
+ UPDATE studenti
+ SET pochta= 'elena.kuznetsova@newmail.com'
+ WHERE imya = 'Елена Кузнецова';
+ UPDATE zachislenie
+ set ochenka ='A'
+ WHERE studenti_id= 3 and
+ kyrsi_id =1;
+ UPDATE zachislenie
+ set ochenka =NULL
+ WHERE studenti_id= 3;
+  UPDATE zachislenie
+ set ochenka ='A'
+ WHERE studenti_id= 3 and
+ kyrsi_id =1;
+ DELETE FROM studenti
+ where imya='Ольга Морозова';
+ SELECT * FROM studenti;
+ SELECT nazvanie_kyrsa, zachoti FROM kyrsi;
+ SELECT * FROM studenti WHERE god_postyplenia = 2021;
+ SELECT * FROM kyrsi WHERE zachoti>4;
+
+ SELECT * FROM studenti WHERE pochta = 'elena.kuznetsova@newmail.com';
+ SELECT * FROM studenti WHERE imya LIKE 'Дмитрий%';
+ SELECT * FROM zachislenie WHERE ochenka is NULL;
+ SELECT * FROM kyrsi ORDER BY nazvanie_kyrsa;
+ SELECT * FROM studenti ORDER BY god_postyplenia ASC, imya ASC;
+ SELECT * FROM studenti ORDER BY god_postyplenia DESC LIMIT 2;
