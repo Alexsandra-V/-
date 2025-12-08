@@ -1,0 +1,301 @@
+DROP TABLE IF EXISTS tovar_v_zakaze;
+
+CREATE TABLE pokypateli (
+    pokypateli_id SERIAL PRIMARY KEY,
+    imya VARCHAR(100) NOT NULL,
+    pochta VARCHAR(100) UNIQUE NOT NULL,
+    data_registracii DATE NOT NULL,
+    porekomendoval INT,
+    FOREIGN KEY (porekomendoval) REFERENCES pokypateli (pokypateli_id)
+);
+
+CREATE TABLE tovari (
+    tovari_id SERIAL PRIMARY KEY,
+    tovari_imya VARCHAR(100) NOT NULL,
+    kategorii VARCHAR(50) NOT NULL,
+    cena DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE zakazi (
+    zakaz_id SERIAL PRIMARY KEY,
+    pokypateli_id INT,
+    data_zakaza date NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (pokypateli_id) REFERENCES pokypateli (pokypateli_id)
+);
+
+CREATE TABLE tovar_v_zakaze (
+    tovar_v_zakaze_id SERIAL PRIMARY KEY,
+    zakaz_id INT,
+    tovari_id INT,
+    kolichestvo INT NOT NULL,
+    cena_za_shtyky DECIMAL(10, 2) NOT NULL
+);
+
+INSERT INTO
+    pokypateli (
+        pokypateli_id,
+        imya,
+        pochta,
+        data_registracii,
+        porekomendoval
+    )
+VALUES (
+        1,
+        'Иван Иванов',
+        'ivan.ivanov@example.com',
+        '2023-01-15',
+        NULL
+    ),
+    (
+        2,
+        'Мария Петрова',
+        'maria.petrova@example.com',
+        '2023-02-20',
+        1
+    ),
+    (
+        3,
+        'Алексей Смирнов',
+        'alex.smirnov@example.com',
+        '2023-03-10',
+        1
+    ),
+    (
+        4,
+        'Елена Васильева',
+        'elena.v@example.com',
+        '2023-04-01',
+        2
+    ),
+    (
+        5,
+        'Андрей Николаев',
+        'andrey.n@example.com',
+        '2023-05-01',
+        NULL
+    );
+
+INSERT INTO
+    tovari (tovari_imya, kategorii, cena)
+VALUES (
+        'Смартфон',
+        'Электроника',
+        70000.00
+    ),
+    (
+        'Ноутбук',
+        'Электроника',
+        120000.00
+    ),
+    (
+        'Кофемашина',
+        'Бытовая техника',
+        25000.00
+    ),
+    (
+        'Книга "Основы SQL"',
+        'Книги',
+        1500.00
+    ),
+    (
+        'Фен',
+        'Бытовая техника',
+        4500.00
+    ),
+    (
+        'Пылесос',
+        'Бытовая техника',
+        15000.00
+    );
+
+INSERT INTO
+    zakazi (
+        pokypateli_id,
+        data_zakaza,
+        status
+    )
+VALUES (1, '2024-05-10', 'Доставлен'),
+    (
+        2,
+        '2024-05-12',
+        'В обработке'
+    ),
+    (1, '2024-05-15', 'Отправлен'),
+    (3, '2024-05-16', 'Доставлен');
+
+INSERT INTO
+    tovar_v_zakaze (
+        zakaz_id,
+        tovari_id,
+        kolichestvo,
+        cena_za_shtyky
+    )
+VALUES (1, 1, 1, 70000.00),
+    (1, 4, 2, 1400.00),
+    (2, 2, 1, 120000.00),
+    (3, 3, 1, 25000.00),
+    (4, 1, 1, 70000.00),
+    (4, 5, 1, 4500.00);
+--8)1
+SELECT p.imya, z.data_zakaza
+FROM pokypateli p
+    JOIN zakazi z ON p.pokypateli_id = z.zakaz_id;
+--8)2
+SELECT p.imya
+FROM pokypateli p
+    LEFT JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+WHERE
+    z.pokypateli_id IS NULL;
+--8)3
+SELECT t.tovari_imya, tvz.kolichestvo, tvz.cena_za_shtyky
+FROM tovar_v_zakaze tvz
+    JOIN tovari t ON t.tovari_id = tvz.tovari_id
+WHERE
+    t.tovari_id = 1;
+--8)4
+SELECT p.imya
+FROM
+    pokypateli p
+    JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+    JOIN tovar_v_zakaze tvz ON z.zakaz_id = tvz.zakaz_id
+    JOIN tovari t ON tvz.tovari_id = t.tovari_id
+WHERE
+    t.tovari_imya = 'Смартфон';
+--8)4
+SELECT p.imya
+from pokypateli p
+WHERE
+    pokypateli_id IN (
+        SELECT DISTINCT
+            pokypateli_id
+        from zakazi
+        WHERE
+            zakaz_id IN (
+                SELECT DISTINCT
+                    zakaz_id
+                from tovar_v_zakaze
+                where
+                    tovar_v_zakaze_id IN (
+                        SELECT DISTINCT
+                            tovar_v_zakaze_id
+                        FROM tovar_v_zakaze
+                        WHERE
+                            tovari_id IN (
+                                SELECT DISTINCT
+                                    tovari_id
+                                from tovari
+                                where
+                                    tovari_imya = 'Смартфон'
+                            )
+                    )
+            )
+    );
+--8)5
+SELECT t.tovari_imya, t.cena
+from tovari t
+WHERE
+    cena > (
+        SELECT AVG(cena)
+        from tovari
+    );
+--8)6
+SELECT z.zakaz_id, z.data_zakaza
+from zakazi z
+WHERE
+    EXISTS (
+        SELECT
+        from tovar_v_zakaze tvz
+        where
+            tvz.zakaz_id = z.zakaz_id
+            AND tvz.cena_za_shtyky > 100000
+    );
+--8)7.1
+SELECT p.imya, t.tovari_imya
+FROM
+    pokypateli p
+    LEFT JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+    LEFT JOIN tovar_v_zakaze tvz ON z.zakaz_id = tvz.zakaz_id
+    LEFT JOIN tovari t ON tvz.tovari_id = t.tovari_id
+    and t.tovari_imya != 'Ноутбук';
+
+--8)7.2
+SELECT p.imya
+FROM pokypateli p
+WHERE
+    pokypateli_id NOT IN (
+        SELECT pokypateli_id
+        from zakazi z
+        WHERE
+            z.zakaz_id NOT IN (
+                SELECT zakaz_id
+                from tovar_v_zakaze
+                where
+                    tovari_id NOT IN (
+                        SELECT tovari_id
+                        from tovari
+                        WHERE
+                            tovari_imya = 'Ноутбук'
+                    )
+            )
+    );
+--8)8
+SELECT t.tovari_imya, p.imya
+FROM
+    pokypateli p
+    RIGHT JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+    RIGHT JOIN tovar_v_zakaze tvz ON z.zakaz_id = tvz.zakaz_id
+    RIGHT JOIN tovari t ON tvz.tovari_id = t.tovari_id
+WHERE
+    p.imya IS NULL;
+--8)9
+SELECT p.imya, t.tovari_imya, tvz.kolichestvo
+from
+    pokypateli p
+    FULL OUTER JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+    FULL OUTER JOIN tovar_v_zakaze tvz ON z.zakaz_id = tvz.zakaz_id
+    FULL OUTER JOIN tovari t ON tvz.tovari_id = t.tovari_id;
+--8)10.1
+SELECT p.imya, t.tovari_imya, t.cena
+FROM
+    pokypateli p
+    JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+    JOIN tovar_v_zakaze tvz ON z.zakaz_id = tvz.zakaz_id
+    JOIN tovari t ON tvz.tovari_id = t.tovari_id
+WHERE
+    t.cena = (
+        SELECT max(cena)
+        from tovari
+    );
+--8)10.2
+SELECT p.imya
+FROM pokypateli p
+WHERE
+    pokypateli_id IN (
+        SELECT pokypateli_id
+        from zakazi
+        WHERE
+            zakaz_id IN (
+                SELECT zakaz_id
+                FROM tovar_v_zakaze
+                WHERE
+                    tovari_id IN (
+                        SELECT tovari_id
+                        FROM tovari t
+                        WHERE
+                            cena = (
+                                SELECT max(cena)
+                                FROM tovari
+                            )
+                    )
+            )
+    );
+--8)11
+SELECT p.imya, t.kategorii
+FROM pokypateli p
+    CROSS JOIN tovari t;
+--8)12
+SELECT porekomendoval.imya, pokypatel.imya
+FROM
+    pokypateli pokypatel
+    left JOIN pokypateli porekomendoval ON pokypatel.porekomendoval = porekomendoval.pokypateli_id;
