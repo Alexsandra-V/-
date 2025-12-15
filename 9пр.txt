@@ -1,0 +1,40 @@
+--9)1
+SELECT kategorii, COUNT(tovari_id)
+FROM tovari
+GROUP BY
+    kategorii;
+--9)2
+SELECT SUM(kolichestvo * cena_za_shtyky) FROM tovar_v_zakaze;
+--9)3
+SELECT p.imya, COUNT(z.zakaz_id)
+FROM pokypateli p
+    LEFT JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+GROUP BY
+    p.imya;
+--9)4
+select AVG (kolichestvo*cena_za_shtyky) FROM tovar_v_zakaze;
+--9)5
+select status,
+COUNT(zakaz_id) from zakazi
+GROUP BY status;
+
+--9)6
+SELECT kategorii,
+    COUNT(tovari_id) 
+    FROM tovari
+GROUP BY kategorii
+having COUNT(tovari_id)>1;
+--9)7
+select p.imya, count(z.pokypateli_id)
+from pokypateli p
+JOIN zakazi z ON p.pokypateli_id = z.pokypateli_id
+GROUP BY p.imya
+having count(z.pokypateli_id)>1;
+
+--9)8 
+SELECT t.tovari_imya, sum(tvz.kolichestvo)
+FROM tovari t
+JOIN tovar_v_zakaze tvz ON t.tovari_id = tvz.tovari_id
+GROUP BY t.tovari_id, t.tovari_imya
+ORDER BY sum(tvz.kolichestvo) DESC
+LIMIT 1;
