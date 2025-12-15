@@ -1,0 +1,64 @@
+--11)1
+CREATE TABLE knigi (
+    knigi_id int PRIMARY KEY,
+    nazvanie VARCHAR(255)
+);
+    CREATE TABLE avtor(
+        avtor_id int PRIMARY KEY,
+        avtor_imya VARCHAR(255)
+
+);
+CREATE TABLE knigi_avtori(
+    avtor_id int,
+    knigi_id int,
+    PRIMARY KEY (knigi_id,avtor_id),
+    FOREIGN KEY (knigi_id) REFERENCES knigi (knigi_id),
+    FOREIGN KEY (avtor_id) REFERENCES avtor (avtor_id)
+);
+CREATE TABLE pyblikaciya (
+    pyblikaciya_id int PRIMARY KEY,
+    izdatelstvo VARCHAR(255),
+    pyblikaciya_gorod VARCHAR(100)
+);
+CREATE TABLE pyblik (
+    pyblikaciya_id int ,
+    knigi_id int,
+    avtor_id int,
+    PRIMARY KEY (pyblikaciya_id, knigi_id, avtor_id),
+    FOREIGN KEY (knigi_id, avtor_id) REFERENCES knigi_avtori (knigi_id, avtor_id),
+    FOREIGN KEY (pyblikaciya_id) REFERENCES pyblikaciya (pyblikaciya_id)
+);
+
+--11)2
+CREATE TABLE mashina (
+    mashina_id SERIAL PRIMARY KEY,
+    model_mashini VARCHAR(100),
+    proizvoditel VARCHAR(100)
+);
+CREATE TABLE gonshik (
+    gonshik_id int,
+    mashina_id int,
+    PRIMARY key (gonshik_id, mashina_id),
+    FOREIGN KEY (mashina_id) REFERENCES mashina (mashina_id)
+);
+CREATE TABLE zaezdi (
+    gonshik_id int,
+    mashina_id int,
+    zaezd_id int,
+    vremya_zaezda TIME,
+    PRIMARY key (gonshik_id, mashina_id,zaezd_id),
+    FOREIGN KEY (gonshik_id, mashina_id) REFERENCES gonshik (gonshik_id, mashina_id)
+);
+--11)3
+CREATE TABLE Rooms (
+    room_id INT PRIMARY KEY,
+    room_name VARCHAR(50)
+);
+CREATE TYPE status_type AS ENUM ('Встреча', 'Презентация');
+CREATE TABLE Bookings (
+    booking_id INT PRIMARY KEY,
+    room_id INT NOT NULL,
+    booking_time DATE,
+    event_type status_type,
+    Foreign Key (room_id) REFERENCES Rooms(room_id)
+);
