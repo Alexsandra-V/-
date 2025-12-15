@@ -1,0 +1,77 @@
+--10)1
+
+CREATE TABLE sotrydniki (
+    sotrydniki_id SERIAL PRIMARY KEY,
+    sotrydniki_imya VARCHAR(100)
+);
+CREATE TABLE proekti (
+    proekti_id SERIAL PRIMARY KEY,
+    proekti_nazvanie VARCHAR(1000)
+);
+CREATE TABLE sotrydniki_v_proekti(
+    sotrydniki_id INT,
+    proekti_id INT,
+    FOREIGN KEY (sotrydniki_id) REFERENCES sotrydniki (sotrydniki_id),
+    FOREIGN KEY (proekti_id) REFERENCES proekti (proekti_id)
+);
+--10)2
+CREATE TABLE klient(
+    klient_id SERIAL PRIMARY KEY,
+    klient_imya VARCHAR(255),
+    klient_pochta VARCHAR (255)
+);
+CREATE TABLE arenda (
+    arenda_id int,
+    oborydovanie VARCHAR (255),
+    data_orendi DATE,
+    klient_id int,
+    PRIMARY KEY (arenda_id,klient_id)
+);
+--10)3.1
+CREATE TABLE stydenti (
+    stydenti_id INT,
+    stydenti_imya VARCHAR(255),
+    ocenki TEXT,
+    PRIMARY KEY (stydenti_id, ocenki)
+);
+CREATE TABLE prepodovateli(
+    prepodovatel_id SERIAL PRIMARY KEY,
+    prepodovatel_kyrsa VARCHAR(255)
+);
+CREATE TABLE kyrsi (
+    kyrs_id int,
+    stydenti_id int ,
+    prepodovatel_id int,
+    PRIMARY KEY (stydenti_id,kyrs_id,prepodovatel_id)
+);
+
+
+
+--10)3.2
+CREATE TABLE styd(
+    styd_id SERIAL PRIMARY KEY,
+    styd_imya VARCHAR (255)
+);
+CREATE TABLE kyrs (
+    kyrsi_id SERIAL PRIMARY KEY,
+    kyrs_imya VARCHAR(255)
+);
+CREATE TABLE styd_v_kyrs(
+    styd_id INT,
+    kyrsi_id int,
+    prepodovatel_id INT,
+    PRIMARY KEY (styd_id,kyrsi_id,prepodovatel_id),
+    FOREIGN KEY (styd_id) REFERENCES styd (styd_id),
+    FOREIGN KEY (kyrsi_id) REFERENCES kyrs (kyrsi_id),
+    FOREIGN KEY (prepodovatel_id) REFERENCES prepodovateli(prepodovatel_id)
+);
+CREATE TABLE ocenkiiii(
+    styd_id int,
+    kyrsi_id int,
+    prepodovatel_id int,
+    nazvanie_zadaniya VARCHAR(255),
+    ocenka int,
+    PRIMARY KEY (styd_id,kyrsi_id,nazvanie_zadaniya),
+    FOREIGN KEY (styd_id,kyrsi_id,prepodovatel_id) REFERENCES styd_v_kyrs (styd_id,kyrsi_id,prepodovatel_id)
+
+);
